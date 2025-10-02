@@ -3,8 +3,6 @@ FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
 # Atur direktori kerja di dalam container
 WORKDIR /app
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 # Install dependensi sistem, termasuk Python dan Pip
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
