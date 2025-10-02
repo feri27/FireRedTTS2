@@ -1,30 +1,28 @@
-# Use an official Python runtime as a parent image
+# Gunakan image python slim sebagai dasar
 FROM python:3.10-slim
 
-# Set the working directory in the container
+# Instalasi dependensi sistem yang diperlukan: git dan git-lfs
+RUN apt-get update && \
+    apt-get install -y git git-lfs && \
+    git lfs install && \
+    rm -rf /var/lib/apt/lists/*
+
+# Atur direktori kerja di dalam container
 WORKDIR /app
 
-# Copy the requirements file into the container at /app
+# Salin file requirements dan install dependensi Python
 COPY requirements.txt .
-
-# Install any needed packages specified in requirements.txt
-# Using --no-cache-dir to reduce image size
-# Installing PyTorch separately for CUDA 11.8 support
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-# Copy the rest of the application's code into the container
-# Assuming your project structure is flat or fireredtts2 is a subdir
+# Salin semua file aplikasi, termasuk entrypoint.sh
 COPY . .
 
-# Make port 7860 available to the world outside this container
+# Berikan izin eksekusi pada entrypoint script
+RUN chmod +x /app/entrypoint.sh
+
+# Buka port yang digunakan oleh Gradio
 EXPOSE 7860
 
-# Define environment variable for pretrained model directory
-# You should mount your pretrained models to this directory
-# e.g., using docker run -v /path/to/your/models:/app/pretrained_models
-ENV PRETRAINED_DIR=/app/pretrained_models
-
-# Run gradio_demo.py when the container launches
-# The application will be available at http://<container-ip>:7860
-CMD ["python", "gradio_demo.py", "--pretrained-dir", "/app/pretrained_models", "--server-name", "0.0.0.0"]
+# Atur entrypoint untuk container
+ENTRYPOINT ["/app/entrypoint.sh"]
