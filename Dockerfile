@@ -6,9 +6,13 @@ WORKDIR /app
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependensi
-RUN apt-get update && apt-get install -y git git-lfs \
-    python3.10 python3-pip git build-essential wget curl \
-    libsndfile1-dev \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    git-lfs \
+    build-essential \
+    curl \
+    libsndfile1-dev && \
     git lfs install && \
     rm -rf /var/lib/apt/lists/*
 
