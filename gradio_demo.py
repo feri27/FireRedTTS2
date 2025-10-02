@@ -18,7 +18,7 @@ def initiate_model(pretrained_dir: str, device="cuda"):
     if model is None:
         model = FireRedTTS2(
             pretrained_dir=pretrained_dir,
-            gen_type="dialogue",
+            gen_type="dialogue", # Tetap menggunakan dialogue untuk mendukung kedua mode
             device=device,
         )
 
@@ -30,95 +30,47 @@ def initiate_model(pretrained_dir: str, device="cuda"):
 # i18n
 _i18n_key2lang_dict = dict(
     # Title markdown
-    title_md_desc=dict(
-        en="FireRedTTS-2 🔥 Dialogue Generation",
-        zh="FireRedTTS-2 🔥 对话生成",
-    ),
+    title_md_desc="FireRedTTS-2 🔥 Speech Generation",
     # Voice mode radio
-    voice_mode_label=dict(
-        en="Voice Mode",
-        zh="音色模式",
-    ),
-    voice_model_choice1=dict(
-        en="Voice Clone",
-        zh="音色克隆",
-    ),
-    voice_model_choice2=dict(
-        en="Random Voice",
-        zh="随机音色",
-    ),
+    voice_mode_label="Voice Mode",
+    voice_model_choice1="Voice Clone",
+    voice_model_choice2="Random Voice",
     # Speaker1 Prompt
-    spk1_prompt_audio_label=dict(
-        en="Speaker 1 Prompt Audio",
-        zh="说话人 1 参考语音",
-    ),
-    spk1_prompt_text_label=dict(
-        en="Speaker 1 Prompt Text",
-        zh="说话人 1 参考文本",
-    ),
-    spk1_prompt_text_placeholder=dict(
-        en="[S1] text of speaker 1 prompt audio.",
-        zh="[S1] 说话人 1 参考文本",
-    ),
+    spk1_prompt_audio_label="Speaker 1 Prompt Audio",
+    spk1_prompt_text_label="Speaker 1 Prompt Text",
+    spk1_prompt_text_placeholder="[S1] text of speaker 1 prompt audio.",
     # Speaker2 Prompt
-    spk2_prompt_audio_label=dict(
-        en="Speaker 2 Prompt Audio",
-        zh="说话人 2 参考语音",
-    ),
-    spk2_prompt_text_label=dict(
-        en="Speaker 2 Prompt Text",
-        zh="说话人 2 参考文本",
-    ),
-    spk2_prompt_text_placeholder=dict(
-        en="[S2] text of speaker 2 prompt audio.",
-        zh="[S2] 说话人 2 参考文本",
-    ),
+    spk2_prompt_audio_label="Speaker 2 Prompt Audio",
+    spk2_prompt_text_label="Speaker 2 Prompt Text",
+    spk2_prompt_text_placeholder="[S2] text of speaker 2 prompt audio.",
     # Dialogue input textbox
-    dialogue_text_input_label=dict(
-        en="Dialogue Text Input",
-        zh="对话文本输入",
-    ),
-    dialogue_text_input_placeholder=dict(
-        en="[S1]text[S2]text[S1]text...",
-        zh="[S1]文本[S2]文本[S1]文本...",
-    ),
+    dialogue_text_input_label="Dialogue Text Input",
+    dialogue_text_input_placeholder="[S1]text[S2]text[S1]text...",
+    # Monologue input textbox
+    monologue_text_input_label="Monologue Text Input",
+    monologue_text_input_placeholder="Enter monologue text here.",
+     # Monologue prompt text
+    monologue_prompt_text_label="Prompt Text (for Voice Clone)",
+    monologue_prompt_text_placeholder="Text of the prompt audio.",
+    # Monologue prompt audio
+    monologue_prompt_audio_label="Prompt Audio (for Voice Clone)",
     # Generate button
-    generate_btn_label=dict(
-        en="Generate Audio",
-        zh="合成",
-    ),
+    generate_btn_label="Generate Audio",
     # Generated audio
-    generated_audio_label=dict(
-        en="Generated Dialogue Audio",
-        zh="合成的对话音频",
-    ),
+    generated_audio_label="Generated Audio",
     # Warining1: invalid text for prompt
-    warn_invalid_spk1_prompt_text=dict(
-        en='Invalid speaker 1 prompt text, should strictly follow: "[S1]xxx"',
-        zh='说话人 1 参考文本不合规，格式："[S1]xxx"',
-    ),
-    warn_invalid_spk2_prompt_text=dict(
-        en='Invalid speaker 2 prompt text, should strictly follow: "[S2]xxx"',
-        zh='说话人 2 参考文本不合规，格式："[S2]xxx"',
-    ),
+    warn_invalid_spk1_prompt_text='Invalid speaker 1 prompt text, should strictly follow: "[S1]xxx"',
+    warn_invalid_spk2_prompt_text='Invalid speaker 2 prompt text, should strictly follow: "[S2]xxx"',
     # Warining2: invalid text for dialogue input
-    warn_invalid_dialogue_text=dict(
-        en='Invalid dialogue input text, should strictly follow: "[S1]xxx[S2]xxx..."',
-        zh='对话文本输入不合规，格式："[S1]xxx[S2]xxx..."',
-    ),
-    # Warining3: incomplete prompt info
-    warn_incomplete_prompt=dict(
-        en="Please provide prompt audio and text for both speaker 1 and speaker 2",
-        zh="请提供说话人 1 与说话人 2 的参考语音与参考文本",
-    ),
+    warn_invalid_dialogue_text='Invalid dialogue input text, should strictly follow: "[S1]xxx[S2]xxx..."',
+     # Warning3: incomplete prompt info
+    warn_incomplete_prompt="Please provide prompt audio and text for the speakers.",
+    # Warning4: empty monologue text
+    warn_empty_monologue_text="Monologue text cannot be empty.",
 )
 
-global_lang: Literal["zh", "en"] = "zh"
-
-
 def i18n(key):
-    global global_lang
-    return _i18n_key2lang_dict[key][global_lang]
+    return _i18n_key2lang_dict[key]
 
 
 def check_monologue_text(text: str, prefix: str = None) -> bool:
@@ -152,14 +104,14 @@ def check_dialogue_text(text_list: List[str]) -> bool:
 
 def dialogue_synthesis_function(
     target_text: str,
-    voice_mode: Literal[0, 1] = 0,  # 0 means voice clone
+    voice_mode: int,  # 0 means voice clone
     spk1_prompt_text: str | None = "",
     spk1_prompt_audio: str | None = None,
     spk2_prompt_text: str | None = "",
     spk2_prompt_audio: str | None = None,
 ):
     # Voice clone mode, check prompt info
-    if voice_mode == 0:
+    if voice_mode == 0: # Voice Clone
         prompt_has_value = [
             spk1_prompt_text != "",
             spk1_prompt_audio is not None,
@@ -175,6 +127,7 @@ def dialogue_synthesis_function(
         if not check_monologue_text(spk2_prompt_text, "[S2]"):
             gr.Warning(message=i18n("warn_invalid_spk2_prompt_text"))
             return None
+
     # Check dialogue text
     target_text_list: List[str] = re.findall(r"(\[S[0-9]\][^\[\]]*)", target_text)
     target_text_list = [text.strip() for text in target_text_list]
@@ -198,147 +151,171 @@ def dialogue_synthesis_function(
     return (24000, target_audio.squeeze(0).numpy())
 
 
+def monologue_synthesis_function(
+    text: str,
+    voice_mode: int, # 0 means voice clone
+    prompt_audio: str | None = None,
+    prompt_text: str | None = "",
+):
+    if not text.strip():
+        gr.Warning(message=i18n("warn_empty_monologue_text"))
+        return None
+
+    prompt_wav = None
+    if voice_mode == 0: # Voice Clone
+        if not prompt_audio or not prompt_text.strip():
+            gr.Warning(message=i18n("warn_incomplete_prompt"))
+            return None
+        prompt_wav = prompt_audio
+
+    # Go synthesis
+    progress_bar = gr.Progress(track_tqdm=True)
+    target_audio = model.generate_monologue(
+        text=text,
+        prompt_wav=prompt_wav,
+        prompt_text=prompt_text,
+        temperature=0.75,
+        topk=20,
+    )
+    return (24000, target_audio.squeeze(0).numpy())
+
+
 # UI rendering
 def render_interface() -> gr.Blocks:
     with gr.Blocks(title="FireRedTTS-2", theme=gr.themes.Default()) as page:
         # ======================== UI ========================
         # A large title
-        title_desc = gr.Markdown(value="# {}".format(i18n("title_md_desc")))
-        with gr.Row():
-            lang_choice = gr.Radio(
-                choices=["中文", "English"],
-                value="中文",
-                label="Display Language/显示语言",
-                type="index",
-                interactive=True,
-            )
-            voice_mode_choice = gr.Radio(
-                choices=[i18n("voice_model_choice1"), i18n("voice_model_choice2")],
-                value=i18n("voice_model_choice1"),
-                label=i18n("voice_mode_label"),
-                type="index",
-                interactive=True,
-            )
-        with gr.Row():
-            # ==== Speaker1 Prompt ====
-            with gr.Column(scale=1):
-                with gr.Group(visible=True) as spk1_prompt_group:
-                    spk1_prompt_audio = gr.Audio(
-                        label=i18n("spk1_prompt_audio_label"),
-                        type="filepath",
-                        editable=False,
-                        interactive=True,
-                    )  # Audio component returns tmp audio path
-                    spk1_prompt_text = gr.Textbox(
-                        label=i18n("spk1_prompt_text_label"),
-                        placeholder=i18n("spk1_prompt_text_placeholder"),
-                        lines=3,
-                    )
-            # ==== Speaker2 Prompt ====
-            with gr.Column(scale=1):
-                with gr.Group(visible=True) as spk2_prompt_group:
-                    spk2_prompt_audio = gr.Audio(
-                        label=i18n("spk2_prompt_audio_label"),
-                        type="filepath",
-                        editable=False,
+        title_desc = gr.Markdown(value=f"# {i18n('title_md_desc')}")
+
+        with gr.Tabs():
+            # ======================== Dialogue Tab ========================
+            with gr.TabItem("Dialogue Generation"):
+                with gr.Row():
+                    dialogue_voice_mode_choice = gr.Radio(
+                        choices=[i18n("voice_model_choice1"), i18n("voice_model_choice2")],
+                        value=i18n("voice_model_choice1"),
+                        label=i18n("voice_mode_label"),
+                        type="index",
                         interactive=True,
                     )
-                    spk2_prompt_text = gr.Textbox(
-                        label=i18n("spk2_prompt_text_label"),
-                        placeholder=i18n("spk2_prompt_text_placeholder"),
-                        lines=3,
+                with gr.Row():
+                    with gr.Column(scale=1):
+                         with gr.Group(visible=True) as spk1_prompt_group:
+                            spk1_prompt_audio = gr.Audio(
+                                label=i18n("spk1_prompt_audio_label"),
+                                type="filepath",
+                                editable=False,
+                                interactive=True,
+                            )
+                            spk1_prompt_text = gr.Textbox(
+                                label=i18n("spk1_prompt_text_label"),
+                                placeholder=i18n("spk1_prompt_text_placeholder"),
+                                lines=3,
+                            )
+                    with gr.Column(scale=1):
+                        with gr.Group(visible=True) as spk2_prompt_group:
+                            spk2_prompt_audio = gr.Audio(
+                                label=i18n("spk2_prompt_audio_label"),
+                                type="filepath",
+                                editable=False,
+                                interactive=True,
+                            )
+                            spk2_prompt_text = gr.Textbox(
+                                label=i18n("spk2_prompt_text_label"),
+                                placeholder=i18n("spk2_prompt_text_placeholder"),
+                                lines=3,
+                            )
+                with gr.Row():
+                    dialogue_text_input = gr.Textbox(
+                        label=i18n("dialogue_text_input_label"),
+                        placeholder=i18n("dialogue_text_input_placeholder"),
+                        lines=10,
                     )
-            # ==== Text input ====
-            with gr.Column(scale=2):
-                dialogue_text_input = gr.Textbox(
-                    label=i18n("dialogue_text_input_label"),
-                    placeholder=i18n("dialogue_text_input_placeholder"),
-                    lines=18,
+
+                dialogue_generate_btn = gr.Button(
+                    value=i18n("generate_btn_label"), variant="primary", size="lg"
                 )
-        # Generate button
-        generate_btn = gr.Button(
-            value=i18n("generate_btn_label"), variant="primary", size="lg"
-        )
-        # Long output audio
-        generate_audio = gr.Audio(
-            label=i18n("generated_audio_label"),
-            interactive=False,
-        )
+                dialogue_generate_audio = gr.Audio(
+                    label=i18n("generated_audio_label"),
+                    interactive=False,
+                )
+
+            # ======================== Monologue Tab ========================
+            with gr.TabItem("Monologue Generation"):
+                with gr.Row():
+                     monologue_voice_mode_choice = gr.Radio(
+                        choices=[i18n("voice_model_choice1"), i18n("voice_model_choice2")],
+                        value=i18n("voice_model_choice1"),
+                        label=i18n("voice_mode_label"),
+                        type="index",
+                        interactive=True,
+                    )
+                with gr.Row():
+                    with gr.Group(visible=True) as monologue_prompt_group:
+                        monologue_prompt_audio = gr.Audio(
+                            label=i18n("monologue_prompt_audio_label"),
+                            type="filepath",
+                            editable=False,
+                            interactive=True,
+                        )
+                        monologue_prompt_text = gr.Textbox(
+                            label=i18n("monologue_prompt_text_label"),
+                            placeholder=i18n("monologue_prompt_text_placeholder"),
+                            lines=3,
+                        )
+                with gr.Row():
+                    monologue_text_input = gr.Textbox(
+                        label=i18n("monologue_text_input_label"),
+                        placeholder=i18n("monologue_text_input_placeholder"),
+                        lines=10,
+                    )
+                monologue_generate_btn = gr.Button(
+                    value=i18n("generate_btn_label"), variant="primary", size="lg"
+                )
+                monologue_generate_audio = gr.Audio(
+                    label=i18n("generated_audio_label"),
+                    interactive=False,
+                )
 
         # ======================== Action ========================
-        # Language action
-        def _change_component_language(lang):
-            global global_lang
-            global_lang = ["zh", "en"][lang]
-            return [
-                # title_desc
-                gr.update(value="# {}".format(i18n("title_md_desc"))),
-                # voice_mode_choice
-                gr.update(
-                    choices=[i18n("voice_model_choice1"), i18n("voice_model_choice2")],
-                    value=i18n("voice_model_choice1"),
-                    label=i18n("voice_mode_label"),
-                ),
-                # spk1_prompt_{audio,text}
-                gr.update(label=i18n("spk1_prompt_audio_label")),
-                gr.update(
-                    label=i18n("spk1_prompt_text_label"),
-                    placeholder=i18n("spk1_prompt_text_placeholder"),
-                ),
-                # spk2_prompt_{audio,text}
-                gr.update(label=i18n("spk2_prompt_audio_label")),
-                gr.update(
-                    label=i18n("spk2_prompt_text_label"),
-                    placeholder=i18n("spk2_prompt_text_placeholder"),
-                ),
-                # dialogue_text_input
-                gr.update(
-                    label=i18n("dialogue_text_input_label"),
-                    placeholder=i18n("dialogue_text_input_placeholder"),
-                ),
-                # generate_btn
-                gr.update(value=i18n("generate_btn_label")),
-                # generate_audio
-                gr.update(label=i18n("generated_audio_label")),
-            ]
-
-        lang_choice.change(
-            fn=_change_component_language,
-            inputs=[lang_choice],
-            outputs=[
-                title_desc,
-                voice_mode_choice,
-                spk1_prompt_audio,
-                spk1_prompt_text,
-                spk2_prompt_audio,
-                spk2_prompt_text,
-                dialogue_text_input,
-                generate_btn,
-                generate_audio,
-            ],
-        )
-
-        # Voice clone mode action
         def _change_prompt_input_visibility(voice_mode):
             enable = voice_mode == 0
-            return [gr.update(visible=enable), gr.update(visible=enable)]
+            return gr.update(visible=enable)
 
-        voice_mode_choice.change(
-            fn=_change_prompt_input_visibility,
-            inputs=[voice_mode_choice],
+        dialogue_voice_mode_choice.change(
+            fn=lambda x: [gr.update(visible=x==0), gr.update(visible=x==0)],
+            inputs=[dialogue_voice_mode_choice],
             outputs=[spk1_prompt_group, spk2_prompt_group],
         )
-        generate_btn.click(
+
+        monologue_voice_mode_choice.change(
+            fn=_change_prompt_input_visibility,
+            inputs=[monologue_voice_mode_choice],
+            outputs=[monologue_prompt_group],
+        )
+
+        dialogue_generate_btn.click(
             fn=dialogue_synthesis_function,
             inputs=[
                 dialogue_text_input,
-                voice_mode_choice,
+                dialogue_voice_mode_choice,
                 spk1_prompt_text,
                 spk1_prompt_audio,
                 spk2_prompt_text,
                 spk2_prompt_audio,
             ],
-            outputs=[generate_audio],
+            outputs=[dialogue_generate_audio],
+        )
+
+        monologue_generate_btn.click(
+            fn=monologue_synthesis_function,
+            inputs=[
+                monologue_text_input,
+                monologue_voice_mode_choice,
+                monologue_prompt_audio,
+                monologue_prompt_text
+            ],
+            outputs=[monologue_generate_audio],
         )
     return page
 
@@ -348,7 +325,10 @@ def render_interface() -> gr.Blocks:
 # ================================================
 def get_args():
     parser = ArgumentParser()
-    parser.add_argument("--pretrained-dir", type=str, required=True)
+    parser.add_argument("--pretrained-dir", type=str, required=True, help="Directory containing pretrained models.")
+    parser.add_argument("--share", action='store_true', help="Create a public link for the Gradio interface.")
+    parser.add_argument("--server-name", type=str, default="0.0.0.0", help="The server name to bind to.")
+    parser.add_argument("--server-port", type=int, default=7860, help="The port number to launch the server on.")
     args = parser.parse_args()
     return args
 
@@ -360,4 +340,4 @@ if __name__ == "__main__":
     print("[INFO] FireRedTTS-2 loaded")
     # UI
     page = render_interface()
-    page.launch()
+    page.launch(share=args.share, server_name=args.server_name, server_port=args.server_port)
