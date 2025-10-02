@@ -5,9 +5,11 @@ WORKDIR /app
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependensi
+# Install dependensi sistem, termasuk Python dan Pip
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
     git \
     git-lfs \
     build-essential \
@@ -25,7 +27,7 @@ RUN pip install --no-cache-dir torch==2.4.0 torchaudio==2.4.0
 COPY . .
 
 # Berikan izin eksekusi pada entrypoint script
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh [cite: 3]
 
 # Buka port yang digunakan oleh Gradio
 EXPOSE 7860
