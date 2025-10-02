@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir torch==2.4.0 torchaudio==2.4.0
 COPY . .
 
 # Berikan izin eksekusi pada entrypoint script
-RUN chmod +x /app/entrypoint.sh [cite: 3]
+RUN chmod +x /app/entrypoint.sh
 
 # Buka port yang digunakan oleh Gradio
 EXPOSE 7860
