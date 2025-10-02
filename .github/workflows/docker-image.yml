@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/fireReadSTT
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/firered-stt
 
 jobs:
   build-and-push:
