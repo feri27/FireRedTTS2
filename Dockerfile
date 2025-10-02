@@ -1,22 +1,21 @@
-FROM nvcr.io/nvidia/tensorrt:23.12-py3
-ENV NVIDIA_DISABLE_REQUIRE=1
-
-# Instalasi dependensi sistem yang diperlukan: git dan git-lfs
-RUN apt-get update && \
-    build-essential \
-    python3-dev python3.10-dev \
-    apt-get install -y git git-lfs && \
-    ffmpeg \
-    git lfs install && \
-    rm -rf /var/lib/apt/lists/*
+FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
 
 # Atur direktori kerja di dalam container
 WORKDIR /app
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependensi
+RUN apt-get update && apt-get install -y git git-lfs \
+    python3.10 python3-pip git build-essential wget curl \
+    libsndfile1-dev \
+    git lfs install && \
+    rm -rf /var/lib/apt/lists/*
+
 # Salin file requirements dan install dependensi Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0
+RUN pip install --no-cache-dir torch==2.4.0 torchaudio==2.4.0
 
 # Salin semua file aplikasi, termasuk entrypoint.sh
 COPY . .
