@@ -1,23 +1,34 @@
 #!/bin/bash
 set -e
 
-if [ -z "$(ls -A /app/pretrained_models 2>/dev/null)" ]; then
-    echo "Folder checkpoints not found"
+# Definisikan direktori target untuk model
+MODEL_DIR="/app/pretrained_models/FireRedTTS2"
+
+# Cek apakah direktori model ada dan tidak kosong
+if [ ! -d "$MODEL_DIR" ] || [ -z "$(ls -A "$MODEL_DIR" 2>/dev/null)" ]; then
+    echo "Model directory not found or is empty. Starting download..."
     
-    ### BLOK PERBAIKAN UNTUK TTS MODEL ###
+    # Membuat direktori induk jika belum ada
+    mkdir -p /app/pretrained_models
+
+    # Mengunduh model FireRedTTS2 menggunakan Git LFS
     echo "Downloading FireRedTTS2 model (step 1: clone without smudge)..."
-    GIT_LFS_SKIP_SMUDGE=1 git clone https://huggingface.co/FireRedTeam/FireRedTTS2 /app/pretrained_models/FireRedTTS2
+    GIT_LFS_SKIP_SMUDGE=1 git clone https://huggingface.co/FireRedTeam/FireRedTTS2 "$MODEL_DIR"
 
     echo "Downloading FireRedTTS2 LFS files (step 2: pull)..."
-    cd /app/pretrained_models/FireRedTTS2
+    cd "$MODEL_DIR"
     git lfs pull
     cd /app # Kembali ke direktori utama
-    ### AKHIR BLOK PERBAIKAN ###
     
-    echo "All model downloaded.."
+    echo "Model download complete."
 else
-    echo "Folder checkpoints already exists and is not empty. Skipping download."
+    echo "Model directory already exists and is not empty. Skipping download."
 fi
 
-echo "Starting main application..."
-exec uvicorn main:app --host 0.0.0.0 --port 8010
+echo "Starting Gradio application..."
+# Menjalankan aplikasi Gradio dan meneruskan path model yang benar
+# `exec` menggantikan proses shell dengan proses python, ini adalah praktik yang baik.
+exec python gradio_demo.py \
+    --pretrained-dir "$MODEL_DIR" \
+    --server-name "0.0.0.0" \
+    --server-port "7860"
