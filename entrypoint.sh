@@ -28,7 +28,7 @@ fi
 echo "Starting Gradio application..."
 # Menjalankan aplikasi Gradio dan meneruskan path model yang benar
 # `exec` menggantikan proses shell dengan proses python, ini adalah praktik yang baik.
-exec python gradio_demo.py \
+exec python3 gradio_demo.py \
     --pretrained-dir "$MODEL_DIR" \
     --server-name "0.0.0.0" \
     --server-port "7860"
