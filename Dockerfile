@@ -3,7 +3,7 @@ FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
 # Atur direktori kerja di dalam container
 WORKDIR /app
 
-# Install dependensi sistem, termasuk Python dan Pip
+# Install dependensi sistem, termasuk Python, Pip, dan SOX
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 \
@@ -12,7 +12,8 @@ RUN apt-get update && \
     git-lfs \
     build-essential \
     curl \
-    libsndfile1-dev && \
+    libsndfile1 \
+    sox && \
     git lfs install && \
     rm -rf /var/lib/apt/lists/*
 
