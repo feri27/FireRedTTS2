@@ -12,6 +12,7 @@ RUN apt-get update && \
     git-lfs \
     build-essential \
     curl \
+    ffmpeg \
     libsndfile1 \
     sox && \
     git lfs install && \
