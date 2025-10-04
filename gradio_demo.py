@@ -148,7 +148,7 @@ def dialogue_synthesis_function(
         temperature=0.9,
         topk=30,
     )
-    return (24000, target_audio.squeeze(0).numpy())
+    return (24000, target_audio.squeeze(0).cpu().numpy())
 
 
 def monologue_synthesis_function(
@@ -177,7 +177,7 @@ def monologue_synthesis_function(
         temperature=0.75,
         topk=20,
     )
-    return (24000, target_audio.squeeze(0).numpy())
+    return (24000, target_audio.squeeze(0).cpu().numpy())
 
 
 # UI rendering
