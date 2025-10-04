@@ -19,11 +19,11 @@ RUN apt-get update && \
 # Salin file requirements dan install dependensi Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir torch==2.4.0 torchaudio==2.4.0
+# Gunakan versi PyTorch yang direkomendasikan
+RUN pip install --no-cache-dir torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu126
 
 # Salin semua file aplikasi, termasuk entrypoint.sh
 COPY . .
-
 # Berikan izin eksekusi pada entrypoint script
 RUN chmod +x /app/entrypoint.sh
 
