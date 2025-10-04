@@ -3,3 +3,4 @@ torchao
 transformers
 einops
 gradio
+PySoundFile
